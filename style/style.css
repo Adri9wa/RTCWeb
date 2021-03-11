@@ -1,0 +1,78 @@
+body{
+    margin: 0;
+}
+
+header{
+    width: 100%;
+    
+    margin: 15px 0px;
+}
+
+
+h1{
+    color: #0076ff;
+    font-family: sans-serif;
+    margin: 0 auto;
+}
+
+.mainTitle{
+    text-align: center;
+}
+
+.ModeButton{
+    padding: 15px;
+    background-color: aqua;
+    position: absolute;
+    border: 3px solid blue;
+    margin-left: 90%;
+    transition: background-color 0.3s ease-out;
+    outline: none;
+    border-radius: 15px;
+    box-shadow: 4px 3px #4f6869;
+
+}
+.ModeButton:hover{
+    background-color: #29c9c9;
+    cursor: pointer;
+}
+
+.controlButtonsBlock{
+    display: flex;
+    justify-content: center;
+}
+
+.controlButton{
+    margin: 0 30px 0 30px;
+    padding: 10px;
+    background-color: #ffc400;
+    border: 3px solid #ff6200;
+    transition: background-color 0.3s ease-out;
+    outline: none;
+    border-radius: 15px;
+/*    margin-left: 10%;*/
+    cursor: pointer;
+}
+
+.WorkTable{
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.generatedMap{
+    display: block;
+    margin: 0 auto 50px auto;
+/*    margin-left: 30%;*/
+    border: 5px solid red;
+    background-color: white;
+    padding: 150px;
+}
+
+
+
+
+
+
+
+
+

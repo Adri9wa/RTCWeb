@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+       <link rel="stylesheet" href="style/style.css">
+       <script src="scripts/mainscript.js"></script>
+    <title>RTC Web</title>
+</head>
+
+<body>
+  
+   <header>
+        <button class="ModeButton" onclick="switchMode()">Dark/Light mode</button>
+    
+        <div class="mainTitle">
+            <h1>RTC</h1>
+        </div>
+    </header>
+    
+    <div class="controlButtonsBlock">
+                <button class="controlButton" onclick="generateRoom()">Generate room</button>
+                
+                <button class="controlButton" onclick="resetRoom()">Reset room</button>
+    </div>
+        
+    <div class="WorkTable">
+        
+        <div class="generatedMap" id="map"></div>
+    </div>
+</body>
+</html>
