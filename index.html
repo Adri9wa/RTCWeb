@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-       <link rel="stylesheet" href="style/style.css">
-       <script src="scripts/mainscript.js"></script>
+      <script src="scripts/mainscript.js"></script>
+       <link rel="stylesheet" href="style/style.css">      
     <title>RTC Web</title>
 </head>
 
-<body>
+<body style="background-color: black">
   
    <header>
         <button class="ModeButton" onclick="switchMode()">Dark/Light mode</button>
@@ -21,11 +21,14 @@
                 <button class="controlButton" onclick="generateRoom()">Generate room</button>
                 
                 <button class="controlButton" onclick="resetRoom()">Reset room</button>
+                <button class="controlButton" onclick="generateRTC()">Generate robot and docking station</button>
     </div>
         
     <div class="WorkTable">
         
-        <div class="generatedMap" id="map"></div>
+<!--        <div class="generatedMap" style="padding: 150px;" id="map"></div>-->
+   <canvas id="map" height="200" width="200"></canvas>
     </div>
+    
 </body>
 </html>

@@ -52,20 +52,37 @@ h1{
 /*    margin-left: 10%;*/
     cursor: pointer;
 }
+.controlButton:hover{
+    background-color: #e3a044;
+}
 
 .WorkTable{
     margin-top: 30px;
     display: flex;
-    align-items: center;
+    justify-content: center;
 }
 
+/*
 .generatedMap{
-    display: block;
+    display: inline-block;
     margin: 0 auto 50px auto;
-/*    margin-left: 30%;*/
     border: 5px solid red;
     background-color: white;
     padding: 150px;
+}
+*/
+
+#map{
+/*    display: block;*/
+    background-color: #fff8d3;
+    border: 5px solid red;
+}
+
+.robot{
+    position: absolute;
+    padding: 10px;
+    border: 3px solid green;
+    background-color: green;
 }
 
 
