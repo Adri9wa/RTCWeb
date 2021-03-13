@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-      <script src="scripts/mainscript.js"></script>
        <link rel="stylesheet" href="style/style.css">      
     <title>RTC Web</title>
 </head>
@@ -21,7 +20,13 @@
                 <button class="controlButton" onclick="generateRoom()">Generate room</button>
                 
                 <button class="controlButton" onclick="resetRoom()">Reset room</button>
-                <button class="controlButton" onclick="generateRTC()">Generate robot and docking station</button>
+                
+                <button class="controlButton" onclick="generateObstacles()">Generate obstacles</button>
+                
+                <button class="controlButton" onclick="generateRTC()" >Generate robot and docking station</button>
+                
+                <button class="controlButton" onclick="clearCanvas()">Clear canvas</button>
+                
     </div>
         
     <div class="WorkTable">
@@ -31,4 +36,6 @@
     </div>
     
 </body>
+      <script src="scripts/mainscript.js"></script>
+
 </html>
