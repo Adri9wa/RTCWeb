@@ -62,15 +62,8 @@ h1{
     justify-content: center;
 }
 
-/*
-.generatedMap{
-    display: inline-block;
-    margin: 0 auto 50px auto;
-    border: 5px solid red;
-    background-color: white;
-    padding: 150px;
-}
-*/
+
+
 
 #map{
 /*    display: block;*/

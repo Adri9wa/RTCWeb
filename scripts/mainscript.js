@@ -1,6 +1,10 @@
-map = document.getElementById("map");
-ctx = map.getContext("2d");
+var map = document.getElementById("map"),
+    ctx = map.getContext("2d"),
+    obstacles = [],
+    trials,
+    minMapX = 300, minMapY = 300, maxMapX = 1200, maxMapY = 1200;
 ctx.font = "20px Arial";
+var RTC = new Object(), Dock = new Object();
 //Light/Dark mode
 function switchMode() {
     if (document.body.style.backgroundColor == "black") {
@@ -14,191 +18,196 @@ function switchMode() {
 
 //Get Random Int in range
 function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
+    var min = Math.ceil(min), max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 //Generate Room Button
 function generateRoom() {
-    minX = 300;
-    minY = 300;
-    maxX = 1200;
-    maxY = 1200;
-    X = getRandomInt(minX, maxX);
-    Y = getRandomInt(minY, maxY)
-    console.log(X, Y);
-    map.width = X;
-    map.height = Y;
+    if (obstacles.length > 0) { if (confirm("Are you sure you want to regenerate the room?")) {
+        var X = getRandomInt(minMapX, maxMapX), Y = getRandomInt(minMapY, maxMapY);
+        console.log(X, Y);
+        map.width = X;
+        map.height = Y;
+        obstacles = [];
+    } }
+    else {
+        var X = getRandomInt(minMapX, maxMapX), Y = getRandomInt(minMapY, maxMapY);
+        console.log(X, Y);
+        map.width = X;
+        map.height = Y;
+    }
+    
+}
+
+function fill(a){
+    ctx.fillRect(a.x, a.y, a.w, a.h);   
 }
 
 //Reset Room Button
 function resetRoom() {
-    if (confirm("Are you sure you want to reset?"))
-    {
-    ctx.clearRect(0, 0, map.width, map.height);
-    map.width = 200;
-    map.height = 200;
+    if (confirm("Are you sure you want to reset?")) {
+        ctx.clearRect(0, 0, map.width, map.height);
+        map.width = 200;
+        map.height = 200;
+        obstacles = [];
     }
 }
 
+function generateWithoutOverlap(w, h, x, y, trials) {
+    flag = true;
+    while (flag) {
+                trials++;
+                if (trials>20) break;
+                for(j = 0; j<obstacles.length; j++){
 
-function checkRectOverlap(l1, r1, l2, r2) {
-    /*
-     * Each array in parameter is one rectangle
-     * in each array, there is an array showing the co-ordinates of two opposite corners of the rectangle
-     * Example:
-     * [[x1, y1], [x2, y2]], [[x3, y3], [x4, y4]]
-     */
-    if (l1[0] >= r2[0] || l2[0] >= r1[0])
-        return false;
+                    var a = new Object();
+                    a.x1 = obstacles[j].x;
+                    a.y1 = obstacles[j].y;
+                    a.x2 = obstacles[j].x+obstacles[j].w;
+                    a.y2 = obstacles[j].y+obstacles[j].h;
+
+                    var b = new Object();
+                    b.x1 = x;
+                    b.y1 = y;
+                    b.x2 = x+w;
+                    b.y2 = y+h;
+
+                        if(overlaps(a, b)){
+                            x = getRandomInt(0, map.width - w);
+                            y = getRandomInt(0, map.height - h);
+                            b.x1 = x;
+                            b.y1 = y;
+                            b.x2 = x+w;
+                            b.y2 = y+h;
+                            flag = true;
+                            break;
+                        }
+                    flag = false;
+                }
+            }
+    console.log(trials);
     
-    if (l1[1] <= r2[1] || l2[1] <= r1[1])
-        return false;
-//    //Check whether there is an x overlap
-//    if ((rect1[0][0] < rect2[0][0] && rect2[0][0] < rect1[1][0]) //Event that x3 is inbetween x1 and x2
-//        || (rect1[0][0] < rect2[1][0] && rect2[1][0] < rect1[1][0]) //Event that x4 is inbetween x1 and x2
-//        || (rect2[0][0] < rect1[0][0] && rect1[1][0] < rect2[1][0])) {  //Event that x1 and x2 are inbetween x3 and x4
-//        //Check whether there is a y overlap using the same procedure
-//        if ((rect1[0][1] < rect2[0][1] && rect2[0][1] < rect1[1][1]) //Event that y3 is between y1 and y2
-//            || (rect1[0][1] < rect2[1][1] && rect2[1][1] < rect1[1][1]) //Event that y4 is between y1 and y2
-//            || (rect2[0][1] < rect1[0][1] && rect1[1][1] < rect2[1][1])) { //Event that y1 and y2 are between y3 and y4
-//            return true;
-//        }
-//    }
-    return true;
+    return [b, trials];
+    
 }
 
+//Check rectangles overlap
+function overlaps(a, b) {
+	if (a.x1 >= b.x2 || b.x1 >= a.x2) return false;
+	if (a.y1 >= b.y2 || b.y1 >= a.y2) return false;
+	return true;
+}
+
+//Generate Obstacles Button
 function generateObstacles() {
-    //console.clear();
+    obstacles = [];
+    ctx.fillStyle = "red";
     ctx.clearRect(0, 0, map.width, map.height);
     ctx.lineWidth = 2;
-    roomX = map.width;
-    roomY = map.height;
-    amount = getRandomInt(3, 10); //Obstacles amount
-    obstacles = [];
-    
+    var roomX = map.width, roomY = map.height,
+    amount = getRandomInt(4, 10); //Obstacles amount
     //Obstacle placement
     for (i=0; i < amount; i++) {
-            ctx.fillStyle = "red";
-
-        trials = 0;
-        obstX = getRandomInt(30, 80);
-        obstY = getRandomInt(30, 80); //Desired obstacle width and height
-        flag = false;
-        //While there is overlap, generate new coords
-        while (!flag) { 
-            trials++;
-            //flag = true;
-            posX = getRandomInt(0, roomX-obstX);
-            posY = getRandomInt(0, roomY-obstY); //Desired coords
-            consX = posX + obstX;
-            consY = posY + obstY;                  
-                                    //Check every other obstacle for overlap
-            if (obstacles.length>0) for (j=0; j<obstacles.length; j++)/*obst in obstacles)*/ {
-                //console.log(Object.entries(obst), obstacles);
-                //console.log(obstacles[j].posX, obstacles[j].posY, obstacles[j].obstX, obstacles[j].obstY);
-                     
-                flag = true;
-                obstConsX = obstacles[j].posX + obstacles[j].obstX;
-                obstConsY = obstacles[j].posY + obstacles[j].obstY;
-                l1 = [posX, posY]; r1 = [consX, consY];
-                l2 = [obstacles[j].posX, obstacles[j].posY]; r2 = [obstConsX, obstConsY];
-                console.log(l2[0], r2[1]);
-                if (checkRectOverlap(l1, r1, l2, r2)){
-                    console.log(i, "Overlap");
-                    flag = false;
-                    break;
-                    }
-                //Overlap checking
-//                if (consX >= obstacles[j].posX && consX <= obstConsX && consY >= obstacles[j].posY && consY <= obstConsY) {
-//                    flag = false;
-//                    }
-                
-            }
-            else flag = true;
-            
-        }
-        //if (trials > 0) {
-                        obstacles.push({
-                        obstX: obstX,
-                        obstY: obstY,
-                        posX: posX,
-                        posY: posY
-                        });
-        ctx.strokeRect(obstacles[i].posX, obstacles[i].posY, obstacles[i].obstX, obstacles[i].obstY);
-
-        ctx.fillRect(obstacles[i].posX, obstacles[i].posY, obstacles[i].obstX, obstacles[i].obstY);
-        //} else continue;
-        ctx.fillStyle = "black";
-        ctx.fillText(i, obstacles[i].posX+obstacles[i].obstX/2-3, obstacles[i].posY+obstacles[i].obstY/2+3);
         
+        var flag = true,
+        obstW = getRandomInt(30, 80),
+        obstH = getRandomInt(30, 80), //Desired obstacle
+        obstX = getRandomInt(0, roomX - obstW),
+        obstY = getRandomInt(0, roomY - obstH);
+        trials = 0;
+        if(obstacles.length>0){
+            
+            //While there is overlap, generate new coords
+            Gen = generateWithoutOverlap(obstW, obstH, obstX, obstY, trials);
+            b = Gen[0];
+            
+            if(Gen[1]<=20){
+                obstacles.push({
+                    w: b.x2-b.x1,
+                    h: b.y2-b.y1,
+                    x: b.x1,
+                    y: b.y1
+                });
+            }
+            else break;
+        }
+        else {
+            obstacles.push({
+                w: obstW,
+                h: obstH,
+                x: obstX,
+                y: obstY
+            });    
+        }    
+        ctx.fillStyle = "red";
+        fill(obstacles[i]);   
+//        ctx.fillStyle = "black";
+//        ctx.fillText(i, obstacles[i].x+obstacles[i].w/2-3, obstacles[i].y+obstacles[i].h/2+3);   
     }
-    console.log(obstacles);
 }
 
 //Generate Robot and Docking Station Button
 function generateRTC() {
+    trials = 0;
     roomX = map.width;
     roomY = map.height;
     //--map
-    
-    minRTCX = 25;
-    minRTCY = 25;
-    maxRTCX = 70;
-    maxRTCY = 70;
-    rtcX = getRandomInt(minRTCX, maxRTCX);
-    rtcY = getRandomInt(minRTCY, maxRTCY);
-    posRTCX = getRandomInt(0, roomX-rtcX);
-    posRTCY = getRandomInt(0, roomY-rtcY);
+       
+    var minW = 25, minH = 25, maxW = 70, maxH = 70;
+    RTC.w = getRandomInt(minW, maxW); RTC.h = getRandomInt(minH, maxH);
+    RTC.x = getRandomInt(0, roomX-RTC.w); RTC.y = getRandomInt(0, roomY-RTC.h);
     //--robot
     
-    //ctx.clearRect(0, 0, map.width, map.height);
-    ctx.fillStyle = "#037403";
-    ctx.fillRect(posRTCX, posRTCY, rtcX, rtcY);
+    Gen = generateWithoutOverlap(RTC.w, RTC.h, RTC.x, RTC.y, trials);
+    b = Gen[0];
+
+    if(Gen[1]<=20){
+        obstacles.push(RTC);
+        RTC.w = b.x2-b.x1; RTC.h = b.y2-b.y1; RTC.x = b.x1; RTC.y = b.y1;
+        ctx.fillStyle = "#0d880d";
+        fill(RTC);
+        ctx.fillStyle = "black";
+        ctx.fillText("R", RTC.x+RTC.w/2-3, RTC.y+RTC.h/2+3); 
     //--robot fill
+    }
+    else {
+        alert("Can't place robot! Clearing canvas..");
+        clearCanvas();
+    }
+
+    minW = 25;
+    minH = 25;
+    maxW = RTC.w;
+    maxH = RTC.h;
     
-    minDockX = 25;
-    minDockY = 25;
-    maxDockX = rtcX;
-    maxDockY = rtcY;
-    DockX = getRandomInt(minDockX, maxDockX);
-    DockY = getRandomInt(minDockY, maxDockY);
-    posDX = [];
-    posDY = [];
+    Dock.w = getRandomInt(minW, maxW); Dock.h = getRandomInt(minH, maxH);
+    Dock.x = getRandomInt(0, roomX-Dock.w); Dock.y = getRandomInt(0, roomY-Dock.h);
     
-    minDockPosX = posRTCX - DockX;
-    minDockPosY = posRTCY - DockY;
-    
-    
-    posDX[0] = getRandomInt(0, posRTCX-DockX);
-    posDX[1] = getRandomInt(posRTCX+rtcX, roomX-DockX);
-    console.log(posDX[0], posDX[1]);
-    posDY[0] = getRandomInt(0, posRTCY-DockY);
-    posDY[1] = getRandomInt(posRTCY+rtcY, roomY-DockY);
-    console.log(posDY[0], posDY[1]);
-    
-    if (roomX-DockX < posRTCX+rtcX) posDockX = posDX[0];
-    else tempX = getRandomInt(0, 1);
-    
-    if (roomY-DockY < posRTCY+rtcY) posDockY = posDY[0];
-    else tempY = getRandomInt(0, 1);
-    
-    
-//    if (posDX[tempX] + DockX >= posRTCX && posDX[tempX] <= posRTCX+rtcX)
-    posDockX = posDX[tempX];
-    posDockY = posDY[tempY];
+    trials = 0;
+    Gen = generateWithoutOverlap(RTC.w, RTC.h, RTC.x, RTC.y, trials);
+    b = Gen[0];
     //--docking st
     
-    console.log("Range X: [0]:", 0, posRTCX-DockX, "[1]:", posRTCX+rtcX, roomX-DockX, "Range Y: [0]:", 0, posRTCY-DockY, "[1]:", posRTCY+rtcY, roomY-DockY, "\nDOCK log: X: [0] =", posDX[0], "| [1] =", posDX[1], "Y: [0] =", posDY[0], "| [1] =", posDY[1], "\nROBOT cons: X =", rtcX, "Y =", rtcY, "| pos: X =", posRTCX, "Y =", posRTCY, "\nDOCK  cons: X =", DockX, "Y =", DockY, "| pos: X =", posDockX, "Y =", posDockY);
-    ctx.fillStyle = "#00c600";
-    ctx.fillRect(posDockX, posDockY, DockX, DockY);
+    if(Gen[1]<=20){
+        Dock.w = b.x2-b.x1; Dock.h = b.y2-b.y1; Dock.x = b.x1; Dock.y = b.y1;
+        ctx.fillStyle = "#00c600";
+        fill(Dock);
+        ctx.fillStyle = "black";
+        ctx.fillText("D", Dock.x+Dock.w/2-3, Dock.y+Dock.h/2+3);   
+        obstacles.pop();
     //--docking st fill
-    
+    }
+    else {
+        alert("Can't place docking station! Clearing canvas..");
+        clearCanvas();
+    }
+
 }
 
 //Clear Canvas Button
 function clearCanvas() {
+    obstacles = [];
     ctx.clearRect(0, 0, map.width, map.height);
 }
 
